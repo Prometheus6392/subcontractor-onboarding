@@ -73,10 +73,21 @@ const emailLabelMap = {
   "candidate name": "name",
   "consultant name": "name",
   subcontractor: "name",
+  "first name": "firstName",
+  firstname: "firstName",
+  "last name": "lastName",
+  lastname: "lastName",
+  surname: "lastName",
   client: "client",
   customer: "client",
   "bill rate": "billRate",
   "billing rate": "billRate",
+  "billrate": "billRate",
+  "hourly rate": "billRate",
+  "rate per hour": "billRate",
+  "rate/hr": "billRate",
+  "rate / hr": "billRate",
+  "rate per hr": "billRate",
   rate: "billRate",
   phone: "phone",
   mobile: "phone",
@@ -85,11 +96,27 @@ const emailLabelMap = {
   "email address": "email",
   entity: "entity",
   "pa/psa": "agreement",
+  "pa psa": "agreement",
+  "pa-psa": "agreement",
+  "pa & psa": "agreement",
+  "pa and psa": "agreement",
+  "pa or psa": "agreement",
+  "pa/psa details": "agreement",
+  "pa psa details": "agreement",
+  "pa/psa number": "agreement",
+  "pa number": "agreement",
+  "psa number": "agreement",
+  "pa id": "agreement",
+  "psa id": "agreement",
   agreement: "agreement",
   pa: "agreement",
   psa: "agreement",
   wbs: "wbs",
   "wbs code": "wbs",
+  "wbs number": "wbs",
+  "wbs no": "wbs",
+  "wbs id": "wbs",
+  "wbs#": "wbs",
   "icats verification": "icatsVerification",
   icats: "icatsVerification",
   "vendor name": "vendorName",
@@ -155,6 +182,14 @@ function normalizeBillRate(value) {
   return match ? match[0].replaceAll(",", "") : "";
 }
 
+function normalizeEmailLabel(value) {
+  return normalizeHeader(value)
+    .replace(/\s*\/\s*/g, "/")
+    .replace(/\s*&\s*/g, " & ")
+    .replace(/\s*-\s*/g, "-")
+    .replace(/\s*#\s*/g, "#");
+}
+
 function escapeHtml(value) {
   return String(value)
     .replaceAll("&", "&amp;")
@@ -204,11 +239,22 @@ function parseDelimitedEmailLine(line, parsed) {
   if (parts.length < 2) return;
 
   for (let index = 0; index < parts.length - 1; index += 2) {
-    const key = emailLabelMap[normalizeHeader(parts[index]).replace(/:$/, "")];
+    const key = emailLabelMap[normalizeEmailLabel(parts[index]).replace(/:$/, "")];
     if (key && !parsed[key]) {
       parsed[key] = parts[index + 1];
     }
   }
+}
+
+function findBillRateFromText(lines) {
+  const ratePattern =
+    /(?:bill\s*rate|billing\s*rate|billrate|hourly\s*rate|rate\s*(?:is|:|-|=|per\s*(?:hour|hr)|\/\s*hr)?)\D{0,16}(\d+(?:,\d{3})*(?:\.\d+)?)/i;
+  const rateLine = lines.find((line) => {
+    const normalized = normalizeHeader(line);
+    return !normalized.includes("rate revision") && !normalized.includes("rate rivision") && ratePattern.test(line);
+  });
+
+  return rateLine ? rateLine.match(ratePattern)[1] : "";
 }
 
 function parseEmailText(text) {
@@ -225,22 +271,27 @@ function parseEmailText(text) {
     const match = line.match(/^(.{2,45}?)[\s]*[:=-][\s]*(.+)$/);
     if (!match) return;
 
-    const label = normalizeHeader(match[1]);
+    const label = normalizeEmailLabel(match[1]);
     const key = emailLabelMap[label];
     if (key && !parsed[key]) {
       parsed[key] = match[2].trim();
     }
   });
 
+  if (!parsed.name) {
+    parsed.name = [parsed.firstName, parsed.lastName].filter(Boolean).join(" ").trim();
+  }
+
   const emailMatch = cleanedText.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i);
   const phoneMatch = cleanedText.match(/(?:\+?\d[\d\s().-]{8,}\d)/);
-  const billRateMatch = cleanedText.match(/(?:bill(?:ing)?\s*rate|rate)\D{0,12}(\d+(?:,\d{3})*(?:\.\d+)?)/i);
   const wbsMatch = cleanedText.match(/\bWBS[-\s:#]*([A-Z0-9-]{3,})\b/i);
+  const agreementMatch = cleanedText.match(/\b(?:PA\s*\/?\s*PSA|PA|PSA)\s*(?:number|no|id|details|code)?\s*[:#=-]?\s*([A-Z0-9][A-Z0-9/_-]{1,})\b/i);
 
   if (emailMatch && !parsed.email) parsed.email = emailMatch[0];
   if (phoneMatch && !parsed.phone) parsed.phone = phoneMatch[0].trim();
-  if (billRateMatch && !parsed.billRate) parsed.billRate = billRateMatch[1];
+  if (!parsed.billRate) parsed.billRate = findBillRateFromText(lines);
   if (wbsMatch && !parsed.wbs) parsed.wbs = wbsMatch[1].toUpperCase();
+  if (agreementMatch && !parsed.agreement) parsed.agreement = agreementMatch[1].toUpperCase();
 
   parsed.billRate = normalizeBillRate(parsed.billRate);
   parsed.dateOfJoining = normalizeDateValue(parsed.dateOfJoining);
