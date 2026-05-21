@@ -23,6 +23,21 @@
           <span class="status-pill" id="recordCount">0 records</span>
         </div>
 
+        <div class="email-parser">
+          <label>
+            <span>Paste Email Data</span>
+            <textarea
+              id="emailPaste"
+              rows="7"
+              placeholder="Paste onboarding email details here. Example: Name: Aarav Mehta, Client: Acme Cloud, Bill Rate: 95, Email: aarav@vendor.com..."
+            ></textarea>
+          </label>
+          <div class="parser-actions">
+            <button type="button" class="secondary" id="clearEmailPaste">Clear paste</button>
+            <button type="button" class="primary" id="fillFromEmail">Fill form</button>
+          </div>
+        </div>
+
         <form id="onboardingForm" novalidate>
           <div class="form-grid">
             <label>
@@ -66,6 +81,11 @@
             <label>
               <span>WBS</span>
               <input name="wbs" type="text" placeholder="WBS-2049-ENG" required />
+            </label>
+
+            <label>
+              <span>ICATS Verification</span>
+              <input name="icatsVerification" type="text" placeholder="Verified, pending, in progress..." required />
             </label>
 
             <label>
@@ -113,6 +133,54 @@
             <span>Search</span>
             <input id="searchInput" type="search" placeholder="Name, client, vendor..." />
           </label>
+          <label class="upload-button">
+            <span>Upload Excel</span>
+            <input id="excelUpload" type="file" accept=".xlsx,.xls,.csv" />
+          </label>
+          <button type="button" class="secondary export-button" id="exportExcel">Export Excel</button>
+        </div>
+
+        <div class="dashboard" aria-label="Onboarding progress dashboard">
+          <article class="metric-card">
+            <span>Total users</span>
+            <strong id="totalUsers">0</strong>
+          </article>
+          <article class="metric-card">
+            <span>ICATS verified</span>
+            <strong id="icatsVerified">0</strong>
+          </article>
+          <article class="metric-card">
+            <span>Ending soon</span>
+            <strong id="endingSoon">0</strong>
+          </article>
+          <article class="metric-card">
+            <span>Avg bill rate</span>
+            <strong id="averageRate">$0</strong>
+          </article>
+        </div>
+
+        <div class="progress-board" aria-label="Progress overview">
+          <div class="progress-row">
+            <div>
+              <strong>ICATS progress</strong>
+              <span id="icatsProgressText">0%</span>
+            </div>
+            <progress id="icatsProgress" value="0" max="100"></progress>
+          </div>
+          <div class="progress-row">
+            <div>
+              <strong>Contract extension progress</strong>
+              <span id="extensionProgressText">0%</span>
+            </div>
+            <progress id="extensionProgress" value="0" max="100"></progress>
+          </div>
+          <div class="progress-row">
+            <div>
+              <strong>Rate revision progress</strong>
+              <span id="rateProgressText">0%</span>
+            </div>
+            <progress id="rateProgress" value="0" max="100"></progress>
+          </div>
         </div>
 
         <div class="table-wrap">
@@ -126,6 +194,7 @@
                 <th>Entity</th>
                 <th>PA/PSA</th>
                 <th>WBS</th>
+                <th>ICATS Verification</th>
                 <th>Vendor</th>
                 <th>Date of Joining</th>
                 <th>End Date</th>
@@ -144,6 +213,8 @@
       </section>
     </main>
 
+    <script>var XLSX = {};</script>
+    <script src="xlsx.full.min.js"></script>
     <script src="script.js"></script>
   </body>
 </html>
