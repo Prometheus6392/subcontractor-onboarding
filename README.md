@@ -57,3 +57,12 @@ The upload tool recognizes these column headers:
 - Contract Extension
 - Rate Revision
 
+## Paste Email Parser Examples
+
+The paste tool recognizes loose email wording such as:
+
+- `bill 120`
+- `rate is 125/hr`
+- `First Name: Priya` and `Last Name: Sharma`
+- `PA PSA Details: PSA-2026`
+- `WBS Code WBS-900`

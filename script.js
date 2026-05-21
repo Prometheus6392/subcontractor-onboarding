@@ -248,10 +248,15 @@ function parseDelimitedEmailLine(line, parsed) {
 
 function findBillRateFromText(lines) {
   const ratePattern =
-    /(?:bill\s*rate|billing\s*rate|billrate|hourly\s*rate|rate\s*(?:is|:|-|=|per\s*(?:hour|hr)|\/\s*hr)?)\D{0,16}(\d+(?:,\d{3})*(?:\.\d+)?)/i;
+    /(?:bill\s*rate|billing\s*rate|billrate|hourly\s*rate|bill|rate\s*(?:is|:|-|=|per\s*(?:hour|hr)|\/\s*hr)?)\D{0,16}(\d+(?:,\d{3})*(?:\.\d+)?)/i;
   const rateLine = lines.find((line) => {
     const normalized = normalizeHeader(line);
-    return !normalized.includes("rate revision") && !normalized.includes("rate rivision") && ratePattern.test(line);
+    return (
+      !normalized.includes("rate revision") &&
+      !normalized.includes("rate rivision") &&
+      !normalized.includes("medical bill") &&
+      ratePattern.test(line)
+    );
   });
 
   return rateLine ? rateLine.match(ratePattern)[1] : "";
@@ -284,8 +289,10 @@ function parseEmailText(text) {
 
   const emailMatch = cleanedText.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i);
   const phoneMatch = cleanedText.match(/(?:\+?\d[\d\s().-]{8,}\d)/);
-  const wbsMatch = cleanedText.match(/\bWBS[-\s:#]*([A-Z0-9-]{3,})\b/i);
-  const agreementMatch = cleanedText.match(/\b(?:PA\s*\/?\s*PSA|PA|PSA)\s*(?:number|no|id|details|code)?\s*[:#=-]?\s*([A-Z0-9][A-Z0-9/_-]{1,})\b/i);
+  const wbsMatch = cleanedText.match(/\bWBS\s*(?:code|number|no|id|#)?\s*[:#=-]?\s*([A-Z0-9][A-Z0-9-]{2,})\b/i);
+  const agreementMatch = cleanedText.match(
+    /\b(?:PA\s*\/?\s*PSA|PA\s+PSA|PA|PSA)\s*(?:number|no|id|details|code)?\s*[:#=-]?\s*([A-Z0-9][A-Z0-9/_-]{1,})\b/i
+  );
 
   if (emailMatch && !parsed.email) parsed.email = emailMatch[0];
   if (phoneMatch && !parsed.phone) parsed.phone = phoneMatch[0].trim();
