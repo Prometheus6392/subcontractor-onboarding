@@ -289,8 +289,8 @@ function parseDelimitedEmailLine(line, parsed) {
 
 function parseLooseEmailLine(line, parsed) {
   const loosePatterns = [
-    ["firstName", /\b(?:first\s*name|first\s*legal\s*name(?:\s*of\s*the\s*consultant)?|legal\s*first\s*name(?:\s*of\s*the\s*consultant)?)\s+(.+)$/i],
-    ["lastName", /\b(?:last\s*name|surname(?:\s*of\s*the\s*consultant)?)\s+(.+)$/i],
+    ["firstName", /\b(?:first\s*name|first legal name of the consultant)?|legal first name of the consultant)?)\s+(.+)$/i],
+    ["lastName", /\b(?:last name|surname of the consultant)?)\s+(.+)$/i],
     ["name", /\b(?:name|candidate\s*name|consultant\s*name)\s+(.+)$/i],
     ["client", /\b(?:client|client\s*name|customer)\s+(.+)$/i],
     ["entity", /\b(?:entity|company\s*code|comapany\s*code|company)\s+(.+)$/i],
