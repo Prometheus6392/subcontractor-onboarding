@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Subcontractor Onboarding</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="panel entry-panel" aria-labelledby="form-title">
+        <div class="panel-header">
+          <div>
+            <p class="eyebrow">Subcontractor onboarding</p>
+            <h1 id="form-title">Add new user</h1>
+          </div>
+          <span class="status-pill" id="recordCount">0 records</span>
+        </div>
+
+        <form id="onboardingForm" novalidate>
+          <div class="form-grid">
+            <label>
+              <span>Name</span>
+              <input name="name" type="text" placeholder="Aarav Mehta" required />
+            </label>
+
+            <label>
+              <span>Client</span>
+              <input name="client" type="text" placeholder="Acme Cloud" required />
+            </label>
+
+            <label>
+              <span>Bill Rate</span>
+              <div class="money-field">
+                <span>$</span>
+                <input name="billRate" type="number" min="0" step="0.01" placeholder="95.00" required />
+              </div>
+            </label>
+
+            <label>
+              <span>Phone</span>
+              <input name="phone" type="tel" placeholder="+1 555 012 0184" required />
+            </label>
+
+            <label>
+              <span>Email</span>
+              <input name="email" type="email" placeholder="aarav@vendor.com" required />
+            </label>
+
+            <label>
+              <span>Entity</span>
+              <input name="entity" type="text" placeholder="LLC, Corporation, etc." required />
+            </label>
+
+            <label>
+              <span>PA/PSA</span>
+              <input name="agreement" type="text" placeholder="Enter PA/PSA details" required />
+            </label>
+
+            <label>
+              <span>WBS</span>
+              <input name="wbs" type="text" placeholder="WBS-2049-ENG" required />
+            </label>
+
+            <label>
+              <span>Vendor Name</span>
+              <input name="vendorName" type="text" placeholder="Northstar Staffing" required />
+            </label>
+
+            <label>
+              <span>Date of Joining</span>
+              <input name="dateOfJoining" type="date" required />
+            </label>
+
+            <label>
+              <span>Contract End Date</span>
+              <input name="contractEnd" type="date" required />
+            </label>
+
+            <label>
+              <span>Contract Extension</span>
+              <input name="contractExtension" type="text" placeholder="Enter extension details" required />
+            </label>
+
+            <label>
+              <span>Rate Revision</span>
+              <input name="rateRevision" type="text" placeholder="Enter rate revision details" required />
+            </label>
+          </div>
+
+          <p class="form-message" id="formMessage" role="status"></p>
+
+          <div class="actions">
+            <button type="reset" class="secondary">Clear</button>
+            <button type="submit" class="primary">Add user</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="panel roster-panel" aria-labelledby="roster-title">
+        <div class="panel-header roster-tools">
+          <div>
+            <p class="eyebrow">Current onboarding list</p>
+            <h2 id="roster-title">Subcontractors</h2>
+          </div>
+          <label class="search-box">
+            <span>Search</span>
+            <input id="searchInput" type="search" placeholder="Name, client, vendor..." />
+          </label>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Client</th>
+                <th>Bill Rate</th>
+                <th>Contact</th>
+                <th>Entity</th>
+                <th>PA/PSA</th>
+                <th>WBS</th>
+                <th>Vendor</th>
+                <th>Date of Joining</th>
+                <th>End Date</th>
+                <th>Extension</th>
+                <th>Rate Revision</th>
+              </tr>
+            </thead>
+            <tbody id="userTable"></tbody>
+          </table>
+        </div>
+
+        <div class="empty-state" id="emptyState">
+          <strong>No subcontractors added yet.</strong>
+          <span>Complete the form to start the onboarding list.</span>
+        </div>
+      </section>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>
