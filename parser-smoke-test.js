@@ -22,6 +22,7 @@ const findBillRateFromText = (lines) => {
 
 const samples = [
   ["bill 120", "120"],
+  ["Candidate Rate 130", "130"],
   ["Bill Rate: $95", "95"],
   ["rate is 125/hr", "125"],
   ["Rate Revision: Pending", ""],

@@ -47,9 +47,12 @@ The upload tool recognizes these column headers:
 - Phone
 - Email
 - Entity
+- OU
 - PA/PSA
 - WBS
 - WBS Code
+- WBS/Project Code
+- Project Code
 - ICATS Verification
 - Vendor Name
 - Date of Joining
@@ -64,5 +67,13 @@ The paste tool recognizes loose email wording such as:
 - `bill 120`
 - `rate is 125/hr`
 - `First Name: Priya` and `Last Name: Sharma`
+- `First Name Priya` and `Last Name Sharma`
+- `First Legal Name of the Consultant Priya` and `Surname of the Consultant Sharma`
+- `Client Name Contoso`
+- `Candidate Rate 120`
+- `Company Code ABC` or `Comapany Code ABC`
+- `OU Code 123`, `OU 123`, or `Code OU 123`
 - `PA PSA Details: PSA-2026`
+- `PA PSA Details PSA-2026`
 - `WBS Code WBS-900`
+- `WBS/Project Code WBS-900`

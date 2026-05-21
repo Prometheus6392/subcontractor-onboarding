@@ -30,6 +30,7 @@ const fieldLabels = {
   phone: "Phone",
   email: "Email",
   entity: "Entity",
+  ou: "OU",
   agreement: "PA/PSA",
   wbs: "WBS",
   icatsVerification: "ICATS Verification",
@@ -43,17 +44,36 @@ const fieldLabels = {
 const uploadHeaderMap = {
   name: "name",
   "add name": "name",
+  "first name": "firstName",
+  "first legal name": "firstName",
+  "first legal name of the consultant": "firstName",
+  "legal first name": "firstName",
+  "last name": "lastName",
+  surname: "lastName",
+  "surname of the consultant": "lastName",
   client: "client",
+  "client name": "client",
   "bill rate": "billRate",
+  "candidate rate": "billRate",
   billrate: "billRate",
   phone: "phone",
   "phone number": "phone",
   email: "email",
+  "email address": "email",
   entity: "entity",
+  "company code": "entity",
+  "comapany code": "entity",
+  company: "entity",
+  ou: "ou",
+  "ou code": "ou",
+  "code ou": "ou",
+  "ou number": "ou",
   "pa/psa": "agreement",
   pa: "agreement",
   psa: "agreement",
   wbs: "wbs",
+  "wbs/project code": "wbs",
+  "wbs project code": "wbs",
   "icats verification": "icatsVerification",
   icats: "icatsVerification",
   "vendor name": "vendorName",
@@ -74,15 +94,22 @@ const emailLabelMap = {
   "consultant name": "name",
   subcontractor: "name",
   "first name": "firstName",
+  "first legal name": "firstName",
+  "first legal name of the consultant": "firstName",
+  "legal first name": "firstName",
+  "legal first name of the consultant": "firstName",
   firstname: "firstName",
   "last name": "lastName",
   lastname: "lastName",
   surname: "lastName",
+  "surname of the consultant": "lastName",
   client: "client",
+  "client name": "client",
   customer: "client",
   "bill rate": "billRate",
   "billing rate": "billRate",
   "billrate": "billRate",
+  "candidate rate": "billRate",
   "hourly rate": "billRate",
   "rate per hour": "billRate",
   "rate/hr": "billRate",
@@ -95,6 +122,13 @@ const emailLabelMap = {
   email: "email",
   "email address": "email",
   entity: "entity",
+  "company code": "entity",
+  "comapany code": "entity",
+  company: "entity",
+  ou: "ou",
+  "ou code": "ou",
+  "code ou": "ou",
+  "ou number": "ou",
   "pa/psa": "agreement",
   "pa psa": "agreement",
   "pa-psa": "agreement",
@@ -113,6 +147,9 @@ const emailLabelMap = {
   psa: "agreement",
   wbs: "wbs",
   "wbs code": "wbs",
+  "wbs/project code": "wbs",
+  "wbs project code": "wbs",
+  "project code": "wbs",
   "wbs number": "wbs",
   "wbs no": "wbs",
   "wbs id": "wbs",
@@ -213,6 +250,10 @@ function normalizeUserRecord(record) {
     }
   });
 
+  if (!normalized.name) {
+    normalized.name = [normalized.firstName, normalized.lastName].filter(Boolean).join(" ").trim();
+  }
+
   Object.keys(fieldLabels).forEach((key) => {
     normalized[key] = String(normalized[key] ?? "").trim();
   });
@@ -246,9 +287,35 @@ function parseDelimitedEmailLine(line, parsed) {
   }
 }
 
+function parseLooseEmailLine(line, parsed) {
+  const loosePatterns = [
+    ["firstName", /\b(?:first\s*name|first\s*legal\s*name(?:\s*of\s*the\s*consultant)?|legal\s*first\s*name(?:\s*of\s*the\s*consultant)?)\s+(.+)$/i],
+    ["lastName", /\b(?:last\s*name|surname(?:\s*of\s*the\s*consultant)?)\s+(.+)$/i],
+    ["name", /\b(?:name|candidate\s*name|consultant\s*name)\s+(.+)$/i],
+    ["client", /\b(?:client|client\s*name|customer)\s+(.+)$/i],
+    ["entity", /\b(?:entity|company\s*code|comapany\s*code|company)\s+(.+)$/i],
+    ["ou", /\b(?:ou\s*code|code\s*ou|ou|ou\s*number)\s+(.+)$/i],
+    ["agreement", /\b(?:pa\s*\/?\s*psa|pa\s+psa|pa|psa)\s+(?:number|no|id|details|code)?\s*(.+)$/i],
+    ["wbs", /\b(?:wbs\s*\/?\s*project\s*code|wbs\s*project\s*code|wbs|project\s*code)\s*(?:code|number|no|id|#)?\s+([A-Z0-9][A-Z0-9-]{2,})\b/i],
+    ["icatsVerification", /\bicats(?:\s*verification)?\s+(.+)$/i],
+    ["vendorName", /\bvendor(?:\s*name)?\s+(.+)$/i],
+    ["dateOfJoining", /\b(?:date\s*of\s*joining|joining|doj|start\s*date)\s+(.+)$/i],
+    ["contractEnd", /\b(?:contract\s*end\s*date|end\s*date)\s+(.+)$/i],
+    ["contractExtension", /\b(?:contract\s*extension|extension)\s+(.+)$/i],
+    ["rateRevision", /\b(?:rate\s*revision|rate\s*rivision)\s+(.+)$/i],
+  ];
+
+  loosePatterns.forEach(([key, pattern]) => {
+    const match = line.match(pattern);
+    if (match && !parsed[key]) {
+      parsed[key] = match[1].trim();
+    }
+  });
+}
+
 function findBillRateFromText(lines) {
   const ratePattern =
-    /(?:bill\s*rate|billing\s*rate|billrate|hourly\s*rate|bill|rate\s*(?:is|:|-|=|per\s*(?:hour|hr)|\/\s*hr)?)\D{0,16}(\d+(?:,\d{3})*(?:\.\d+)?)/i;
+    /(?:candidate\s*rate|bill\s*rate|billing\s*rate|billrate|hourly\s*rate|bill|rate\s*(?:is|:|-|=|per\s*(?:hour|hr)|\/\s*hr)?)\D{0,16}(\d+(?:,\d{3})*(?:\.\d+)?)/i;
   const rateLine = lines.find((line) => {
     const normalized = normalizeHeader(line);
     return (
@@ -264,7 +331,7 @@ function findBillRateFromText(lines) {
 
 function parseEmailText(text) {
   const parsed = {};
-  const cleanedText = text.replace(/\r/g, "\n");
+  const cleanedText = text.replace(/\r/g, "\n").replace(/;/g, "\n");
   const lines = cleanedText
     .split("\n")
     .map((line) => line.trim())
@@ -272,6 +339,7 @@ function parseEmailText(text) {
 
   lines.forEach((line) => {
     parseDelimitedEmailLine(line, parsed);
+    parseLooseEmailLine(line, parsed);
 
     const match = line.match(/^(.{2,45}?)[\s]*[:=-][\s]*(.+)$/);
     if (!match) return;
@@ -289,7 +357,9 @@ function parseEmailText(text) {
 
   const emailMatch = cleanedText.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i);
   const phoneMatch = cleanedText.match(/(?:\+?\d[\d\s().-]{8,}\d)/);
-  const wbsMatch = cleanedText.match(/\bWBS\s*(?:code|number|no|id|#)?\s*[:#=-]?\s*([A-Z0-9][A-Z0-9-]{2,})\b/i);
+  const wbsMatch = cleanedText.match(
+    /\b(?:WBS\s*\/?\s*Project\s*Code|WBS\s*Project\s*Code|WBS|Project\s*Code)\s*(?:code|number|no|id|#)?\s*[:#=-]?\s*([A-Z0-9][A-Z0-9-]{2,})\b/i
+  );
   const agreementMatch = cleanedText.match(
     /\b(?:PA\s*\/?\s*PSA|PA\s+PSA|PA|PSA)\s*(?:number|no|id|details|code)?\s*[:#=-]?\s*([A-Z0-9][A-Z0-9/_-]{1,})\b/i
   );
@@ -398,6 +468,7 @@ function renderTable() {
             <a href="mailto:${escapeHtml(user.email)}">${escapeHtml(user.email)}</a>
           </td>
           <td>${escapeHtml(user.entity)}</td>
+          <td>${escapeHtml(user.ou)}</td>
           <td>${escapeHtml(user.agreement)}</td>
           <td>${escapeHtml(user.wbs)}</td>
           <td>${escapeHtml(user.icatsVerification)}</td>
@@ -425,6 +496,7 @@ function getExportRows() {
     Phone: user.phone,
     Email: user.email,
     Entity: user.entity,
+    OU: user.ou,
     "PA/PSA": user.agreement,
     WBS: user.wbs,
     "ICATS Verification": user.icatsVerification,
